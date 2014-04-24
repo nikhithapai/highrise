@@ -1,5 +1,5 @@
 Hello BLueconey Team,
 Welcome to the Highrise Project.
-Regards,
+All the Best !
 Ruben.
 
