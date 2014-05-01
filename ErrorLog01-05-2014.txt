@@ -1,0 +1,50 @@
+org.springframework.dao.InvalidDataAccessApiUsageException: Write operations are not allowed in read-only mode (FlushMode.MANUAL): Turn your Session into FlushMode.COMMIT/AUTO or remove 'readOnly' marker from transaction definition. at org.springframework.orm.hibernate3.HibernateTemplate.checkWriteOperationAllowed (HibernateTemplate.java:1175)
+This exception tells that the transaction is read-only. When you see the following kind of error while saving an object into database through hibernate then you can resolve this by two ways.
+
+Caused by: org.springframework.dao.InvalidDataAccessApiUsageException: Write operations are not allowed in read-only mode (FlushMode.MANUAL): 
+Turn your Session into FlushMode.COMMIT/AUTO or remove 'readOnly' marker from transaction definition.
+        at org.springframework.orm.hibernate3.HibernateTemplate.checkWriteOperationAllowed(HibernateTemplate.java:1175)
+        at org.springframework.orm.hibernate3.HibernateTemplate$12.doInHibernate(HibernateTemplate.java:685)
+        at org.springframework.orm.hibernate3.HibernateTemplate$12.doInHibernate(HibernateTemplate.java:1)
+        at org.springframework.orm.hibernate3.HibernateTemplate.doExecute(HibernateTemplate.java:406)
+        at org.springframework.orm.hibernate3.HibernateTemplate.executeWithNativeSession(HibernateTemplate.java:374)
+        at org.springframework.orm.hibernate3.HibernateTemplate.save(HibernateTemplate.java:683)
+
+Solutions
+===========
+
+1) Add @Transactional(readOnly = false) to your method where you are creating the record (saving the object) into the database. Your code should look like something below....
+
+@Transactional(readOnly=false)
+    public void save(Object object) {
+    	if(object == null) return;
+    	getHibernateTemplate().save(object);
+    }
+
+2) Add the init param flushMode to your OpenSessionInviewFilter class.
+
+You need to add ...
+<init-param>  
+<param-name>flushMode</param-name>  
+<param-value>AUTO</param-value>  
+</init-param>
+
+So, your xml file will look like something as follows...
+
+  <filter>  
+      <filter-name>OpenSessionInViewFilter</filter-name>  
+     <filter-class>  
+           org.springframework.orm.hibernate3.support.OpenSessionInViewFilter</filter-class>  
+       <init-param>  
+            <param-name>sessionFactoryBeanName</param-name>  
+           <param-value>sessionFactory</param-value>  
+        </init-param>  
+       <init-param>  
+           <param-name>singleSession</param-name>  
+            <param-value>true</param-value>  
+       </init-param>  
+       <init-param>  
+            <param-name>flushMode</param-name>  
+           <param-value>AUTO</param-value>  
+       </init-param>  
+   </filter>
